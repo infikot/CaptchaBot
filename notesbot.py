@@ -93,25 +93,10 @@ async def rmems(message: Message):
 @bot.on.chat_message(text="/rhorny")
 async def rhorny(message: Message):
     if message.chat_id in (5, 4):
-        print("\n \n \n" + str(imagefurrynocopy) + "\n \n \n")
         photos = await userbot.api.photos.get(owner_id=-214905751, album_id="285930010")
         photo = random.choice(photos.items)
-        if photo.id in imagefurrynocopy:
-            photo = random.choice(photos.items)
-            if photo.id in imagefurrynocopy:
-                photo = random.choice(photos.items)
-                await message.answer(message="Решил пошалить со своими зверюшками? Ну, удачи, семпай!~",
-                                     attachment=f"photo{photo.owner_id}_{photo.id}")
-                imagefurrynocopy.append(photo.id)
-            else:
-                await message.answer(message="Решил пошалить со своими зверюшками? Ну, удачи, семпай!~",
-                                 attachment=f"photo{photo.owner_id}_{photo.id}")
-                imagefurrynocopy.append(photo.id)
-        else:
-            await message.answer(message="Решил пошалить со своими зверюшками? Ну, удачи, семпай!~",
-                                 attachment=f"photo{photo.owner_id}_{photo.id}")
-            imagefurrynocopy.append(photo.id)
-        photo = 0
+        await message.answer(message="Решил пошалить со своими зверюшками? Ну, удачи, семпай!~",
+                             attachment=f"photo{photo.owner_id}_{photo.id}")
     else:
         await message.answer(
             "В данной беседе эта команда запрещена. \n Проверь полный список команд и их разрешений с помощью команды /ac")

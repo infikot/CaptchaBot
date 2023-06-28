@@ -1,6 +1,6 @@
 # Персональный бот с капчёй для бесед.
 Это GitHub чат-бота, который помогает в борьбе с ботами, код которого вы можете взять для основы своих творений!
 
-ВК: vk.com/all.s.ninehr
-Связанные боты: vk.com/alisiabot and vk.com/notesbot 
+ВК: https://vk.com/all.s.ninehr
+Связанные боты: https://vk.com/alisiabot and https://vk.com/notesbot 
 Всё это создано благодаря VK Api, VKBottle и другим не менее важным библиотекам!

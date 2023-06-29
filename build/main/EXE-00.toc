@@ -2,7 +2,7 @@
  True,
  False,
  True,
- 'C:\\Users\\Bqu-Note\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-console.ico',
+ ['C:\\Users\\Bqu-Note\\Desktop\\first\\icon.ico'],
  None,
  False,
  False,
@@ -54,7 +54,7 @@
  [],
  False,
  False,
- 1687995075,
+ 1688062601,
  [('run.exe',
    'C:\\Users\\Bqu-Note\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')])

@@ -8,6 +8,53 @@ import re
 import getpass
 import sqlite3
 import os
+from typing import TYPE_CHECKING, Optional
+from vkbottle.polling.user_polling import UserPolling
+from vkbottle_types.events.enums import UserEventType
+from vkbottle_types.events.user_events import RawUserEvent
+from vkbottle.framework.labeler import UserLabeler
+
+class new_act_class:
+    pass
+new_act = new_act_class()
+
+new_act.member_id = None; new_act.peer_id = None; new_act.type_action = None
+
+# проверка новых пользователей в чате от лица сообщества
+if TYPE_CHECKING:
+    from vkbottle.api import ABCAPI
+    from vkbottle.exception_factory import ABCErrorHandler
+
+class BotMessagesPooling(UserPolling):
+    """The bot uses the User Long Poll to get its events.
+    For example, such events can be exiting or entering a conversation.
+    """
+
+    def __init__(
+        self,
+        api: Optional["ABCAPI"] = None,
+        user_id: Optional[int] = None,
+        wait: Optional[int] = None,
+        mode: Optional[int] = None,
+        rps_delay: Optional[int] = None,
+        error_handler: Optional["ABCErrorHandler"] = None,
+        group_id: Optional[int] = None,
+    ):
+        super().__init__(
+            api=api,
+            user_id=user_id,
+            wait=wait,
+            mode=mode,
+            rps_delay=rps_delay,
+            error_handler=error_handler,
+        )
+        self.group_id = group_id
+
+    async def get_server(self) -> dict:
+        logger.debug("Getting polling server...")
+        if self.group_id is None:
+            self.group_id = (await self.api.request("groups.getById", {}))["response"][0]["id"]
+        return (await self.api.request("messages.getLongPollServer", {}))["response"]
 
 time_to_die = 120
 
@@ -37,6 +84,14 @@ try:
     sqlite_connection = sqlite3.connect('database/bots.db')
     cursor = sqlite_connection.cursor()
     txtfile()
+    try:
+        if cursor.execute(f'SELECT * FROM users WHERE user_id = {int(1)}').fetchall():
+            pass
+    except:
+        cursor.execute("""CREATE TABLE IF NOT EXISTS users(
+            user_id INT,
+            status_in_chat TEXT);""")
+        sqlite_connection.commit()
 except:
     try:
         my_cwd = os.getcwd()
@@ -85,7 +140,7 @@ while end == False:
 if debug == True or debug == False:
     logger.disable("vkbottle")
 
-bot = Bot(token=getpass.getpass('\n\nТокен группы (скрытый ввод): '))
+bot = Bot(token=getpass.getpass('\n\nТокен группы (скрытый ввод): '), labeler=UserLabeler(), polling=BotMessagesPooling())
 print("\nБот был успешно запущен! (..если не было выведено ошибок..)\n\n")
 
 bot.labeler.vbml_ignore_case = True
@@ -169,10 +224,11 @@ async def ban(message: Message, member_id: str or None = None):
             await message.reply(message=f"Пользователь @id{member_id} был разбанен или подтверждён вручную.",
                                 attachment=message.conversation_message_id)
 
-
-@bot.on.chat_message()
-async def text(message: Message):
-    act = message.action
+async def starttesting(message, member_id, peer_id):
+    if message != None:
+        act = message.action
+    else:
+        act = None
     try:
         if "conversation_message_id=None" in str(
                 act) and "type=<MessagesMessageActionStatus.CHAT_INVITE_USER: 'chat_invite_user'>" in str(act):
@@ -189,6 +245,7 @@ async def text(message: Message):
                     await asyncio.sleep(10)
                     await bot.api.messages.delete(cmids=message_to_delete.conversation_message_id,
                                                   peer_id=message.peer_id, delete_for_all=True)
+
             else:
                 message_to_delete = await message.answer(
                     f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 2+2*2=? \n(ответ 6, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
@@ -207,6 +264,39 @@ async def text(message: Message):
                             if debug == True: print(
                                 f"Пользователь https://vk.com/id{member_id} не успел пройти капчу.. Ему был \nвыдан статус banned")
                             await bot.api.messages.remove_chat_user(chat_id=message.chat_id, member_id=member_id)
+                            if debug == True: print(
+                                f"Пользователь https://vk.com/id{member_id} был кикнут из беседы.")
+                except:
+                    pass
+        elif act == None and member_id != None and peer_id != None:
+            if cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall():
+                res = cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall()
+                if res[0][1] == "banned":
+                    await bot.api.messages.remove_chat_user(chat_id=peer_id, member_id=member_id)
+                    if debug == True: print(
+                        f"Пользователь https://vk.com/id{member_id} был кикнут из беседы, ведь он уже был забанен системой.")
+                    message_to_delete = await bot.api.messages.send(peer_id=peer_id, random_id=0, message=f"@id{member_id} ранее был забанен в боте. Для его разбана админам чата нужно прописать ^pass <пользователь> \n\nЭто сообещние исчезнет через 10 секунд.")
+                    await asyncio.sleep(10)
+                    await bot.api.messages.delete(message_id=message_to_delete,
+                                                  peer_id=peer_id, delete_for_all=True)
+            else:
+                message_to_delete = await bot.api.messages.send(peer_id=peer_id, random_id=0, message=f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 2+2*2=? \n(ответ 6, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
+                if debug == True: print(
+                    f"Капчу начал проходить пользователь https://vk.com/id{member_id}, \nведь он вступил в беседу, в которой находился активный бот.")
+                cursor.execute(f'INSERT INTO users (user_id, status_in_chat) VALUES ({member_id}, "waiting")')
+                sqlite_connection.commit()
+                print(message_to_delete)
+                if debug == True: print(f"Был выдан статус waiting пользователю https://vk.com/id{member_id}")
+                await asyncio.sleep(time_to_die)
+                await bot.api.messages.delete(message_id=message_to_delete, peer_id=peer_id,
+                                              delete_for_all=True)
+                try:
+                    if cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall():
+                        res = cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall()
+                        if res[0][1] == "waiting":
+                            if debug == True: print(
+                                f"Пользователь https://vk.com/id{member_id} не успел пройти капчу.. Ему был \nвыдан статус banned")
+                            await bot.api.messages.remove_chat_user(chat_id=peer_id, member_id=member_id)
                             if debug == True: print(
                                 f"Пользователь https://vk.com/id{member_id} был кикнут из беседы.")
                 except:
@@ -264,12 +354,31 @@ async def text(message: Message):
                 pass
     except VKAPIError as err:
         if debug == "debug":
-            await message.answer(f"Произошла ошибка: {err}")
             print(f"\nПроизошла ошибка: {err}\n\n")
+            await message.answer(f"Произошла ошибка: {err}")
         elif debug == True:
             print(f"\nПроизошла ошибка: {err}\n\n")
         else:
             pass
+
+@bot.on.chat_message()
+async def text(message: Message):
+    await starttesting(message, None, None)
+
+@bot.on.raw_event(UserEventType.CHAT_INFO_EDIT, dataclass=RawUserEvent)
+async def process_event(event):
+    if event.object[1] == 7:
+        type_action = "вышел из чата."
+    elif event.object[1] == 6:
+        type_action = "присоединился к чату!"
+    else:
+        type_action = "вернулся в чат!"
+    if debug == True: print(type_action)
+    if event.object[1] == 6:
+        member_id = event.object[3]; peer_id = event.object[2]
+        await starttesting(None, member_id, peer_id)
+
+
 
 
 bot.run_forever()

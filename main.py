@@ -251,7 +251,7 @@ async def main():
 
                 else:
                     message_to_delete = await message.answer(
-                        f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 2+2*2=? \n(ответ 6, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
+                        f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 10*3-5=? \n(ответ 25, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
                     if debug == True: print(
                         f"Капчу начал проходить пользователь https://vk.com/id{member_id}, \nведь он вступил в беседу, в которой находился активный бот.")
                     cursor.execute(f'INSERT INTO users (user_id, status_in_chat) VALUES ({member_id}, "waiting")')
@@ -283,7 +283,7 @@ async def main():
                         await bot.api.messages.delete(message_id=message_to_delete,
                                                       peer_id=peer_id, delete_for_all=True)
                 else:
-                    message_to_delete = await bot.api.messages.send(peer_id=peer_id, random_id=0, message=f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 2+2*2=? \n(ответ 6, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
+                    message_to_delete = await bot.api.messages.send(peer_id=peer_id, random_id=0, message=f'Приветствую, @id{member_id}! \nПеред свои первым сообщением настоятельно рекомендую решить пример ниже, ведь это АнтиБот система! \n\n 10*3-5=? \n(ответ 25, напиши только это число!) \n\nСообщение будет удалено через {time_to_die} секунд, ровно столько времени у Вас есть для решения капчи!')
                     if debug == True: print(
                         f"Капчу начал проходить пользователь https://vk.com/id{member_id}, \nведь он вступил в беседу, в которой находился активный бот.")
                     cursor.execute(f'INSERT INTO users (user_id, status_in_chat) VALUES ({member_id}, "waiting")')
@@ -304,7 +304,7 @@ async def main():
                                     f"Пользователь https://vk.com/id{member_id} был кикнут из беседы.")
                     except:
                         pass
-            elif "6" in message.text[:10]:
+            elif "25" in message.text[:10]:
                 member_id = message.from_id
                 if cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall():
                     res = cursor.execute(f'SELECT * FROM users WHERE user_id = {int(member_id)}').fetchall()

@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-# !/usr/bin/env python
+import sys
+
+# Установка кодировки UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stdin.reconfigure(encoding='utf-8')
 
 from vkbottle import VKAPIError
 from vkbottle.user import Message

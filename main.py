@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# !/usr/bin/env python
+
 from vkbottle import VKAPIError
 from vkbottle.user import Message
 from vkbottle import Bot

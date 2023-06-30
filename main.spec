@@ -37,7 +37,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['C:\\Users\\Bqu-Note\\Desktop\\first\\icon.ico'],
+    icon=['C:\\Users\\Bqu-Note\\Desktop\\first\\ico.png'],
 )
 coll = COLLECT(
     exe,
